@@ -12,9 +12,9 @@
 
 bool WiFi::initialized = false;
 
-ip4_addr_t WiFi::ip;
-ip4_addr_t WiFi::gateway;
-ip4_addr_t WiFi::subnetmask;
+esp_ip4_addr_t WiFi::ip;
+esp_ip4_addr_t WiFi::gateway;
+esp_ip4_addr_t WiFi::subnetmask;
 bool WiFi::connected = false;
 
 WiFi::WiFi() {
@@ -134,7 +134,7 @@ bool WiFi::Disconnect(bool release) {
 	return true;
 }
 
-ip4_addr_t *WiFi::getIp() {
+esp_ip4_addr_t *WiFi::getIp() {
 	if (!connected) return nullptr;
 	return &ip;
 }
