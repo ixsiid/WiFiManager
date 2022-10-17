@@ -1,5 +1,4 @@
-#ifndef __UTILITY_WIFI_H
-#define __UTILITY_WIFI_H
+#pragma once
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -33,5 +32,3 @@ class WiFi {
 	static esp_ip4_addr_t* getIp();
 	static const char * get_address();
 };
-
-#endif  // __UTILITY_WIFI_H
