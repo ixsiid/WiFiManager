@@ -6,7 +6,6 @@ file(GLOB SRCS
 	src/*.c
      )
 set(COMPONENT_SRCS ${SRCS})
-set(COMPONENT_REQUIRES esp_wifi esp_event lwip)
-
+set(COMPONENT_REQUIRES esp_wifi esp_event lwip wpa_supplicant)
 
 register_component()
