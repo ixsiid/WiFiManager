@@ -89,6 +89,8 @@ void WiFi::event_handler(void *arg, esp_event_base_t event_base,
 };
 
 #ifdef CONFIG_WPA_DPP_SUPPORT
+WiFi::pairing_text_callback_t WiFi::callback = nullptr;
+
 void WiFi::dpp_enrollee_event_cb(esp_supp_dpp_event_t event, void *data) {
 	switch (event) {
 		case ESP_SUPP_DPP_URI_READY:
@@ -101,6 +103,7 @@ void WiFi::dpp_enrollee_event_cb(esp_supp_dpp_event_t event, void *data) {
 				ESP_LOG_BUFFER_HEXDUMP(TAG, data, 32, esp_log_level_t::ESP_LOG_ERROR);
 				const char * qr_text = static_cast<const char *>(data);
 				ESP_LOGI(TAG, "%s", qr_text);
+				if (callback) callback(qr_text);
 			}
 			break;
 		case ESP_SUPP_DPP_CFG_RECVD:
@@ -125,11 +128,13 @@ void WiFi::dpp_enrollee_event_cb(esp_supp_dpp_event_t event, void *data) {
 	}
 };
 
-esp_err_t WiFi::wait_connection() {
+esp_err_t WiFi::wait_connection(pairing_text_callback_t callback) {
 	if (initialized) {
 		ESP_LOGE(TAG, "WiFi is Initialized");
 		return 12;
 	}
+
+	WiFi::callback = callback;
 
 	return initialize(SetupMode::DPP);
 }

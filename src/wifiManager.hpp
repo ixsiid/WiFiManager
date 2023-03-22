@@ -37,7 +37,7 @@ class WiFi {
 	static void event_handler(void* arg, esp_event_base_t event_base,
 						 int32_t event_id, void* event_data);
 
-	static esp_err_t initialize(SetupMode mode, const char *ssid = nullptr, const char *password = nullptr);
+	static esp_err_t initialize(SetupMode mode, const char* ssid = nullptr, const char* password = nullptr);
 
     public:
 	static esp_err_t Connect(const char* ssid, const char* password);
@@ -46,10 +46,14 @@ class WiFi {
 	static const char* get_address();
 
 #ifdef CONFIG_WPA_DPP_SUPPORT
+    public:
+	typedef void (*pairing_text_callback_t)(const char* pairing_text);
+
     private:
+	static pairing_text_callback_t callback;
 	static void dpp_enrollee_event_cb(esp_supp_dpp_event_t event, void* data);
 
     public:
-	static esp_err_t wait_connection();
+	static esp_err_t wait_connection(pairing_text_callback_t callback = nullptr);
 #endif
 };
