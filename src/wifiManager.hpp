@@ -17,7 +17,9 @@ class WiFi {
     private:
 	enum class SetupMode {
 		Normal,
+#ifdef CONFIG_WPA_DPP_SUPPORT
 		DPP,
+#endif
 	};
 
 	WiFi();

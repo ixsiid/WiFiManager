@@ -59,10 +59,12 @@ void WiFi::event_handler(void *arg, esp_event_base_t event_base,
 				ESP_ERROR_CHECK(esp_wifi_connect());
 				ESP_LOGI(TAG, "STA starting");
 			break;
+#ifdef CONFIG_WPA_DPP_SUPPORT
 			case WiFi::SetupMode::DPP:
 				ESP_ERROR_CHECK(esp_supp_dpp_start_listen());
 				ESP_LOGI(TAG, "Started listening for DPP Authentication");
 			break;
+#endif
 		}
 	} else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
 		wifi_event_sta_disconnected_t *event = (wifi_event_sta_disconnected_t *)event_data;
