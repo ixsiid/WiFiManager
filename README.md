@@ -44,4 +44,6 @@ void app_main() {
 I (1380) WiFi Manager: DPP:C:81/6;M:xx:xx:xx:xx:xx:xx;K:MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADJoeKKbJhp+PP9oktUc1Jbsk4K6WOPD7cuUV5XHn1Qtg=;;
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 				   Read your smartphone by QR code
+				   
+                       ^^^^^^^^10^^^^^^^^20^^^^^^^^30^^^^^^^^40^^^^^^^^50^^^^^^^^60^^^^^^^^70^^^^^^^^80^^^^^^^^90^^^^^^^100^^^^^^^110^^115
 ```
