@@ -376,8 +376,8 @@ class QrCode final {
 	private: static const int PENALTY_N4;
 	
 	
-	private: static const std::int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
-	private: static const std::int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
+	private: static const std::int8_t ECC_CODEWORDS_PER_BLOCK = 18; // Ecc::LOW, version=6
+	private: static const std::int8_t NUM_ERROR_CORRECTION_BLOCKS = 2; // Ecc::Low, version=6
 	
 };
 

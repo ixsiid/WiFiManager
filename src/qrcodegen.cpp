@@ -31,6 +31,8 @@
 #include <utility>
 #include "qrcodegen.hpp"
 
+#include <esp_log.h>
+
 using std::int8_t;
 using std::size_t;
 using std::uint8_t;
@@ -142,6 +144,28 @@ QrCode QrCode::encodeText(const char *text) {
 	vector<uint8_t> dataCodewords(bb.size() / 8);
 	for (size_t i = 0; i < bb.size(); i++)
 		dataCodewords.at(i >> 3) |= (bb.at(i) ? 1 : 0) << (7 - (i & 7));
+
+	ESP_LOG_BUFFER_HEXDUMP("a", dataCodewords.data(), dataCodewords.size(), ESP_LOG_INFO);
+	ESP_LOG_BUFFER_HEXDUMP("a", text, strlen(text), ESP_LOG_INFO);
+
+	vector<uint8_t> bb8; // its same with dataCodewords
+	for (int i = 0; i < bb.size() / 8; i++) {
+			bb8.push_back(
+		    bb[i * 8 + 0] << 7 |
+		    bb[i * 8 + 1] << 6 |
+		    bb[i * 8 + 2] << 5 |
+		    bb[i * 8 + 3] << 4 |
+		    bb[i * 8 + 4] << 3 |
+		    bb[i * 8 + 5] << 2 |
+		    bb[i * 8 + 6] << 1 |
+		    bb[i * 8 + 7] << 0);
+	}
+	ESP_LOG_BUFFER_HEXDUMP("a", bb8.data(), bb8.size(), ESP_LOG_INFO);
+	for (int i=0; i<bb.size(); i++) {
+		if (i % 41 == 0) printf("\n");
+		printf("%c", bb[i] ? '0' : ' ');
+	}
+	printf("\n");
 
 	// Create the QR Code object
 	return QrCode(dataCodewords, mask);
@@ -273,8 +297,8 @@ bool QrCode::module(int x, int y) const {
 
 vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	// Calculate parameter numbers
-	int numBlocks	    = NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(errorCorrectionLevel)][version];
-	int blockEccLen    = ECC_CODEWORDS_PER_BLOCK[static_cast<int>(errorCorrectionLevel)][version];
+	int numBlocks	    = NUM_ERROR_CORRECTION_BLOCKS;
+	int blockEccLen    = ECC_CODEWORDS_PER_BLOCK;
 	int rawCodewords   = getNumRawDataModules() / 8;
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockLen  = rawCodewords / numBlocks;
@@ -470,7 +494,7 @@ int QrCode::getNumRawDataModules() {
 }
 
 int QrCode::getNumDataCodewords() {
-	return getNumRawDataModules() / 8 - ECC_CODEWORDS_PER_BLOCK[static_cast<int>(Ecc::LOW)][version] * NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(Ecc::LOW)][version];
+	return getNumRawDataModules() / 8 - ECC_CODEWORDS_PER_BLOCK * NUM_ERROR_CORRECTION_BLOCKS;
 }
 
 vector<uint8_t> QrCode::reedSolomonComputeDivisor(int degree) {
@@ -554,24 +578,6 @@ const int QrCode::PENALTY_N1 = 3;
 const int QrCode::PENALTY_N2 = 3;
 const int QrCode::PENALTY_N3 = 40;
 const int QrCode::PENALTY_N4 = 10;
-
-const int8_t QrCode::ECC_CODEWORDS_PER_BLOCK[4][41] = {
-    // Version: (note that index 0 is for padding, and is set to an illegal value)
-    // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
-    {-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},	 // Low
-    {-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28},	 // Medium
-    {-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},	 // Quartile
-    {-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},	 // High
-};
-
-const int8_t QrCode::NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
-    // Version: (note that index 0 is for padding, and is set to an illegal value)
-    // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
-    {-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25},			 // Low
-    {-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49},	 // Medium
-    {-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68},	 // Quartile
-    {-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81},	 // High
-};
 
 /*---- Class BitBuffer ----*/
 
